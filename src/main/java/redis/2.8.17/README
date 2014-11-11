@@ -1,20 +1,24 @@
-Where to find complete Redis documentation?
+Where to find complete Redis documentation? (哪里可以找到完整的Redis文档？)
 -------------------------------------------
 
 This README is just a fast "quick start" document. You can find more detailed
 documentation at http://redis.io
 
-Building Redis
+此自述文件仅是一个快速的"快速入门"文档，在 http://redis.io 上可以找到更加详细的文档。
+
+Building Redis (构建Redis)
 --------------
 
 Redis can be compiled and used on Linux, OSX, OpenBSD, NetBSD, FreeBSD.
 We support big endian and little endian architectures.
 
+Redis可以在Linux上编译和使用，支持高位优先和低位优先的体系结构。
+
 It may compile on Solaris derived systems (for instance SmartOS) but our
 support for this platform is "best effort" and Redis is not guaranteed to
 work as well as in Linux, OSX, and *BSD there.
 
-It is as simple as:
+It is as simple as (构建):
 
     % make
 
@@ -23,8 +27,13 @@ You can run a 32 bit Redis binary using:
     % make 32bit
 
 After building Redis is a good idea to test it, using:
+在构建完Redis之后，测试它是一个好主意。使用：
 
     % make test
+
+若测试全都OK的话，会输出如下信息：
+
+    \o/ All tests passed without errors!
 
 Fixing problems building 32 bit binaries
 ---------
@@ -41,7 +50,7 @@ the following steps:
 
     make CFLAGS="-m32 -march=native" LDFLAGS="-m32"
 
-Allocator
+Allocator (内存分配器)
 ---------
 
 Selecting a non-default memory allocator when building Redis is done by setting
@@ -49,6 +58,10 @@ the `MALLOC` environment variable. Redis is compiled and linked against libc
 malloc by default, with the exception of jemalloc being the default on Linux
 systems. This default was picked because jemalloc has proven to have fewer
 fragmentation problems than libc malloc.
+
+在构建Redis时，通过设置`MALLOC`环境变量来选择一个非默认的内存分配器。
+Linux系统默认使用jemalloc
+jemalloc，相比libc malloc，已被证明含有更少的内存碎片问题。
 
 To force compiling against libc malloc, use:
 
@@ -58,7 +71,7 @@ To compile against jemalloc on Mac OS X systems, use:
 
     % make MALLOC=jemalloc
 
-Verbose build
+Verbose build (详细构建信息)
 -------------
 
 Redis will build with a user friendly colorized output by default.
@@ -66,22 +79,25 @@ If you want to see a more verbose output use the following:
 
     % make V=1
 
-Running Redis
+Running Redis (运行Redis)
 -------------
 
 To run Redis with the default configuration just type:
+使用默认配置来运行Redis实例：
 
     % cd src
     % ./redis-server
     
 If you want to provide your redis.conf, you have to run it using an additional
 parameter (the path of the configuration file):
+提供自定义的`redis.conf`配置文件：
 
     % cd src
     % ./redis-server /path/to/redis.conf
 
 It is possible to alter the Redis configuration passing parameters directly
 as options using the command line. Examples:
+直接传递参数选项来修改Redis配置：
 
     % ./redis-server --port 9999 --slaveof 127.0.0.1 6379
     % ./redis-server /etc/redis/6379.conf --loglevel debug
@@ -89,11 +105,13 @@ as options using the command line. Examples:
 All the options in redis.conf are also supported as options using the command
 line, with exactly the same name.
 
-Playing with Redis
+Playing with Redis (玩转Redis)
 ------------------
 
 You can use redis-cli to play with Redis. Start a redis-server instance,
 then in another terminal try the following:
+使用`redis-cli`与Redis交互
+先启动一个redis服务器实例，然后在另一个终端输入以下命令：
 
     % cd src
     % ./redis-cli
@@ -110,13 +128,15 @@ then in another terminal try the following:
     redis> 
 
 You can find the list of all the available commands here:
+在这里可以找到所有可用的命令列表：
 
     http://redis.io/commands
 
-Installing Redis
+Installing Redis (安装Redis)
 -----------------
 
 In order to install Redis binaries into /usr/local/bin just use:
+为了安装Redis的二进制文件到`/usr/local/bin`目录，只要用：
 
     % make install
 
@@ -129,6 +149,9 @@ needed if you want just to play a bit with Redis, but if you are installing
 it the proper way for a production system, we have a script doing this
 for Ubuntu and Debian systems:
 
+`make install`仅会安装二进制文件到您的系统，并不会配置初始化脚本和配置文件。
+如果在生产系统上安装它，对于Ubuntu和Debian系统，我们有一个脚本做这样的事：
+
     % cd utils
     % ./install_server.sh
 
@@ -136,10 +159,16 @@ The script will ask you a few questions and will setup everything you need
 to run Redis properly as a background daemon that will start again on
 system reboots.
 
+该脚本会问你几个问题，并设置运行Redis作为后台守护进程所需的一切，
+它将在系统重启时再次启动。
+
 You'll be able to stop and start Redis using the script named
 /etc/init.d/redis_<portnumber>, for instance /etc/init.d/redis_6379.
 
-Code contributions
+您可以使用`/etc/init.d/redis_<portnumber>`命名的脚本来停止和启动Redis，
+例如 /etc/init.d/redis_6379。
+
+Code contributions (代码贡献)
 ---
 
 Note: by contributing code to the Redis project in any form, including sending
