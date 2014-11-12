@@ -2,7 +2,11 @@
 #
 # Simple Redis init.d script conceived to work on Linux systems
 # as it does use of the /proc filesystem.
+#
+# 简单的Redis启动、关闭脚本，工作在Linux系统上
+# 因为它使用/proc文件系统
 
+# 端口号、服务器和客户端的执行文件、进程ID文件、配置文件
 REDISPORT=6379
 EXEC=/usr/local/bin/redis-server
 CLIEXEC=/usr/local/bin/redis-cli
@@ -10,6 +14,7 @@ CLIEXEC=/usr/local/bin/redis-cli
 PIDFILE=/var/run/redis_${REDISPORT}.pid
 CONF="/etc/redis/${REDISPORT}.conf"
 
+# 参数列表（start、stop）
 case "$1" in
     start)
         if [ -f $PIDFILE ]
@@ -17,6 +22,7 @@ case "$1" in
                 echo "$PIDFILE exists, process is already running or crashed"
         else
                 echo "Starting Redis server..."
+                # 加载配置
                 $EXEC $CONF
         fi
         ;;
