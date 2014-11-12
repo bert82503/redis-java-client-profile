@@ -1,4 +1,8 @@
 
+##
+# 根据"进程ID文件"是否存在，来进行逻辑处理。
+##
+
 case "$1" in
     start)
         if [ -f $PIDFILE ]
@@ -6,6 +10,7 @@ case "$1" in
             echo "$PIDFILE exists, process is already running or crashed"
         else
             echo "Starting Redis server..."
+            # 加载配置文件
             $EXEC $CONF
         fi
         ;;
