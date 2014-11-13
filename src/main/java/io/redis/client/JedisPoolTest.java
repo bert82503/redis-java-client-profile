@@ -44,6 +44,8 @@ public class JedisPoolTest {
 
         String key = "hello";
         String value = "world";
+
+        // get
         assertEquals(jedis.get(key), null);
         // set
         String statusCode = jedis.set(key, value);
