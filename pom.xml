@@ -14,5 +14,19 @@
   </properties>
 
   <dependencies>
+	<!-- Redis -->
+	<dependency>
+		<groupId>redis.clients</groupId>
+		<artifactId>jedis</artifactId>
+		<version>2.6.0</version>
+	</dependency>
+
+	<!-- Test -->
+	<dependency>
+		<groupId>org.testng</groupId>
+		<artifactId>testng</artifactId>
+		<version>6.8.8</version>
+		<scope>test</scope>
+	</dependency>
   </dependencies>
 </project>
