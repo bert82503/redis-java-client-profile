@@ -5,9 +5,21 @@
 #
 # 简单的Redis启动、关闭脚本，工作在Linux系统上
 # 因为它使用/proc文件系统
+#
+# 示例：
+#   sudo sh redis_init_script.sh start 6379
+#
 
-# 端口号、服务器和客户端的执行文件、进程ID文件、配置文件
 REDISPORT=6379
+
+# 读取"端口号"可选参数
+if [ ! -z "$2" ] ; then
+	REDISPORT=$2
+	echo "Selected Port: $REDISPORT"
+fi
+
+
+# 服务器和客户端的执行文件、进程ID文件、配置文件
 EXEC=/usr/local/bin/redis-server
 CLIEXEC=/usr/local/bin/redis-cli
 
