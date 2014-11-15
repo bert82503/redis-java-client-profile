@@ -79,7 +79,7 @@ If you want to see a more verbose output use the following:
 
     % make V=1
 
-Running Redis (运行Redis)
+Running Redis (运行Redis服务器)
 -------------
 
 To run Redis with the default configuration just type:
@@ -105,7 +105,7 @@ as options using the command line. Examples:
 All the options in redis.conf are also supported as options using the command
 line, with exactly the same name.
 
-Playing with Redis (玩转Redis)
+Playing with Redis (玩转Redis客户端)
 ------------------
 
 You can use redis-cli to play with Redis. Start a redis-server instance,
@@ -132,7 +132,7 @@ You can find the list of all the available commands here:
 
     http://redis.io/commands
 
-Installing Redis (安装Redis)
+Installing Redis (安装Redis服务)
 -----------------
 
 In order to install Redis binaries into /usr/local/bin just use:
