@@ -11,6 +11,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <version>1.4.1.RELEASE</version>
   </properties>
 
   <dependencies>
@@ -19,6 +20,11 @@
 		<groupId>redis.clients</groupId>
 		<artifactId>jedis</artifactId>
 		<version>2.6.0</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework.data</groupId>
+		<artifactId>spring-data-redis</artifactId>
+		<version>${version}</version>
 	</dependency>
 	<!-- 
 	<dependency>

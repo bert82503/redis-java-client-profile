@@ -1,12 +1,15 @@
+# Gradle
+/.gradle/
+
 # Maven
 /target/
 
 # TestNG
 /test-output/
 
-# PMD
-/.pmd/
-
+# IDEA
+.idea
+*.iml
 
 # Eclipse
 /.settings/
