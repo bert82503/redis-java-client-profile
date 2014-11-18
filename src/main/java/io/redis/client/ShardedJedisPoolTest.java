@@ -89,10 +89,16 @@ public class ShardedJedisPoolTest {
 
     private static final String TWEMPROXY_FILE = "twemproxy.txt";
 
-    private static final int    SIZE           = 1001;
+    private static final String DEFAUL_VALUE   = "1";
+
+    private static final String RET_OK         = "OK";
+
+    private static final int    SIZE           = 10;
 
     /**
-     * 测试 Twemproxy 的分布式 Sharding 功能。
+     * 测试 Twemproxy 的 "Shard data automatically across multiple servers (跨多台服务器自动切分数据)" 功能。
+     * <p>
+     * <font color="red">注意：记得调整随机样本数量({@link #SIZE})的值！建议该值被设置为大于1000</font>
      * 
      * @throws IOException
      */
@@ -107,12 +113,12 @@ public class ShardedJedisPoolTest {
 
             // 样本数量
             Random rand = new Random(System.currentTimeMillis());
-            for (int i = 1; i < SIZE; i++) {
+            for (int i = 0; i < SIZE; i++) {
                 int v = rand.nextInt();
                 String key = Integer.toString(v);
                 writer.println(key);
                 // SET
-                jedis.set(key, "1");
+                jedis.set(key, DEFAUL_VALUE);
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -124,7 +130,9 @@ public class ShardedJedisPoolTest {
     }
 
     /**
-     * 验证 Twemproxy 的分布式 Sharding 功能。
+     * 验证 Twemproxy 的"跨多台服务器自动切分数据"功能。
+     * <p>
+     * 通过统计随机样本 Keys 的"命中率"，分布在每台服务器的Key的总数差不多，分布还算均匀。
      * 
      * @throws IOException
      */
@@ -135,8 +143,7 @@ public class ShardedJedisPoolTest {
         List<String> keys = FileUtils.readLines(file);
 
         /*
-         * 1. 获取 redis 服务器列表；
-         * 2. 对每台 redis 服务器循环进行 Key GET 操作，获取命中数。
+         * 1. 获取 redis 服务器列表； 2. 对每台 redis 服务器循环进行 Key GET 操作，获取命中数。
          */
         List<HostAndPort> hostList = this.getHostList(ServerFlag.REDIS);
         for (HostAndPort hostInfo : hostList) {
@@ -174,34 +181,42 @@ public class ShardedJedisPoolTest {
         }
     }
 
+    /**
+     * 验证 Twemproxy 的 "auto-failover" 功能。
+     * <p>
+     * 当某个节点宕掉时，Twemproxy可以自动将它从集群中剔除； 而当它恢复服务时，Twemproxy也会自动连接。
+     * <p>
+     * 随机样本 Keys 通过 {@link #sharding()} 方法自动生成，并写到 {@link #TWEMPROXY_FILE} 文件中。<br>
+     * <font color="red">但要注意：记得调整随机样本数量({@link #SIZE})的值！建议该值被设置为小于20</font>
+     */
     @Test
-    public void doString() throws InterruptedException {
-        for (int i = 0; i < 1; i++) {
-            TimeUnit.SECONDS.sleep(3L);
-            // set
-            ShardedJedis jedis = this.pool.getResource();
-            String statusCode = jedis.set("1", "1");
-            assertEquals(statusCode, "OK");
-            this.pool.returnResource(jedis);
-            out.println("Complete: 1");
+    public void autoFailover() {
+        ShardedJedis jedis = null;
+        String[] keys = { "-640595852", // 6379
+                "563752978", // 6379
+                "1297026184", // 6380
+                "843626243", // 6380, 6379
+                "579761811", // 6379
+                "-1148481590", // 6379
+                "-1653107798", // 6381
+                "1208161125", // 6380, 6381
+                "549094194", // 6381
+                "1082579570", // 6380, 6381
+        };
+        String statusCode = null;
 
-            TimeUnit.SECONDS.sleep(3L);
-            // set
-            ShardedJedis jedis2 = this.pool.getResource();
-            statusCode = jedis2.set("2", "2");
-            assertEquals(statusCode, "OK");
-            this.pool.returnResource(jedis2);
-            out.println("Complete: 2");
-
-            TimeUnit.SECONDS.sleep(3L);
-            // set
-            ShardedJedis jedis3 = this.pool.getResource();
-            statusCode = jedis3.set("3", "3");
-            assertEquals(statusCode, "OK");
-            this.pool.returnResource(jedis3);
-            out.println("Complete: 3");
-
-            out.println("Complete time: " + i);
+        for (String key : keys) {
+            try {
+                // 获取一条Redis连接
+                jedis = this.pool.getResource();
+                // SET
+                statusCode = jedis.set(key, DEFAUL_VALUE);
+                assertEquals(statusCode, RET_OK);
+                // 返回连接到连接池
+                this.pool.returnResourceObject(jedis);
+            } catch (Exception e) {
+                out.println("Set key error: " + key);
+            }
         }
     }
 
