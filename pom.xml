@@ -47,7 +47,6 @@
 	 -->
 
 	<!-- Log -->
-	<!-- 
 	<dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
@@ -58,7 +57,6 @@
 		<artifactId>logback-classic</artifactId>
 		<version>1.1.2</version>
 	</dependency>
-	 -->
 
 	<!-- Test -->
 	<dependency>
