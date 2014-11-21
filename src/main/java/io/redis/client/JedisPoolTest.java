@@ -91,8 +91,8 @@ public class JedisPoolTest {
             assertEquals(statusCode, "OK");
 
             // get
-            // String v = jedis.get(key);
-            // assertEquals(v, "yes");
+            String v = jedis.get(key);
+            assertEquals(v, "yes");
 
             // delete
             Long delNum = jedis.del(key);

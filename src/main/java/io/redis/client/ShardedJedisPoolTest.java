@@ -1,6 +1,5 @@
 package io.redis.client;
 
-import static java.lang.System.out;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
@@ -15,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,6 +32,8 @@ import redis.clients.jedis.ShardedJedisPool;
  * @author huagang.li 2014年11月13日 下午4:06:19
  */
 public class ShardedJedisPoolTest {
+
+    private static final Logger logger          = LoggerFactory.getLogger(ShardedJedisPoolTest.class);
 
     private static final String DEFAULT_HOST    = "127.0.0.1";
 
@@ -173,7 +176,9 @@ public class ShardedJedisPoolTest {
                     }
                 }
 
-                out.println("Host " + hostInfo + "'s hit ratio: " + hits);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Host {}'s hit ratio: {}", hostInfo, hits);
+                }
             } finally {
                 jedisPool.close();
             }
@@ -215,7 +220,7 @@ public class ShardedJedisPoolTest {
                 // 返回连接到连接池
                 this.pool.returnResourceObject(jedis);
             } catch (Exception e) {
-                out.println("Set key error: " + key);
+                logger.error("Set key error: {}", key);
             }
         }
     }
