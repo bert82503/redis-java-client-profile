@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,13 +54,14 @@ public class ShardedJedisPoolTest {
         }
 
         GenericObjectPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(10);
-        poolConfig.setMaxIdle(10);
+        // 高并发压测
+        poolConfig.setMaxTotal(65536);
+        poolConfig.setMaxIdle(65536);
         poolConfig.setMinIdle(3);
-        poolConfig.setMaxWaitMillis(TimeUnit.SECONDS.toMillis(1L));
-
+        poolConfig.setBlockWhenExhausted(false);
+        poolConfig.setMaxWaitMillis(TimeUnit.MILLISECONDS.toMillis(30L));
         poolConfig.setTestOnBorrow(true);
-        poolConfig.setTestWhileIdle(true);
+        poolConfig.setTestOnReturn(true);
 
         this.pool = new ShardedJedisPool(poolConfig, shards);
     }
@@ -98,6 +100,32 @@ public class ShardedJedisPoolTest {
 
     private static final int    SIZE           = 10;
 
+    private AtomicInteger       counter        = new AtomicInteger(1);
+
+    /**
+     * 高并发压力测试。
+     * <p>
+     * 因为Twemproxy与后端redis服务器在每执行一条命令时，都会创建一条新的链接。
+     */
+    @Test(invocationCount = 20000, threadPoolSize = 1024)
+    public void highConcurrencyStressTest() {
+        long start = System.currentTimeMillis();
+
+        // 获取一条Redis连接
+        ShardedJedis jedis = this.pool.getResource();
+        // SET
+        String key = "st_" + counter.getAndIncrement();
+        String statusCode = jedis.set(key, DEFAUL_VALUE);
+        assertEquals(statusCode, RET_OK);
+        // 返回连接到连接池
+        this.pool.returnResource(jedis);
+
+        long runTime = System.currentTimeMillis() - start;
+        if (runTime > 10) {
+            logger.info("{}'s run time: {}", key, runTime);
+        }
+    }
+
     /**
      * 测试 Twemproxy 的 "Shard data automatically across multiple servers (跨多台服务器自动切分数据)" 功能。
      * <p>
@@ -115,7 +143,7 @@ public class ShardedJedisPoolTest {
             writer = new PrintWriter(new FileWriter(TWEMPROXY_FILE));
 
             // 样本数量
-            Random rand = new Random(System.currentTimeMillis());
+            Random rand = new Random();
             for (int i = 0; i < SIZE; i++) {
                 int v = rand.nextInt();
                 String key = Integer.toString(v);
