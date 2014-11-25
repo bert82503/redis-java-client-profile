@@ -35,6 +35,7 @@ public class JedisPoolTest {
         poolConfig.setBlockWhenExhausted(false);
         poolConfig.setMaxWaitMillis(TimeUnit.MILLISECONDS.toMillis(30L));
         poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestOnReturn(true);
 
         String host = "127.0.0.1";
         int port = 10001;
@@ -53,16 +54,23 @@ public class JedisPoolTest {
         String key = "hello";
         String value = "world";
 
+        /*
+         * 一组逻辑操作
+         */
         // get
-        assertEquals(jedis.get(key), null);
+        String v = jedis.get(key);
+        assertEquals(v, null);
         // set
         String statusCode = jedis.set(key, value);
         assertEquals(statusCode, "OK");
         // get
-        assertEquals(jedis.get(key), "world");
+        v = jedis.get(key);
+        assertEquals(v, "world");
         // delete
         Long delNum = jedis.del(key);
         assertEquals(delNum.longValue(), 1L);
+
+        this.pool.returnResource(jedis);
     }
 
     /**
