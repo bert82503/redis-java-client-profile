@@ -12,10 +12,14 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version>1.4.1.RELEASE</version>
+    <spring.version>1.4.1.RELEASE</spring.version>
+    <btrace.version>1.2.3</btrace.version>
   </properties>
 
   <dependencies>
+	<!-- ======================================= -->
+	<!-- Apache Commons 框架 -->
+	<!-- ======================================= -->
 	<dependency>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>commons-lang3</artifactId>
@@ -26,8 +30,24 @@
 		<artifactId>commons-io</artifactId>
 		<version>2.4</version>
 	</dependency>
+	
+	<!-- ======================================= -->
+	<!-- BTrace - 动态追踪工具 -->
+	<!-- ======================================= -->
+	<dependency>
+  		<groupId>com.sun.tools.btrace</groupId>
+  		<artifactId>btrace-boot</artifactId>
+  		<version>${btrace.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.sun.tools.btrace</groupId>
+  		<artifactId>btrace-agent</artifactId>
+  		<version>${btrace.version}</version>
+  	</dependency>
 
-	<!-- Redis -->
+	<!-- ======================================= -->
+	<!-- 缓存（Redis）客户端 -->
+	<!-- ======================================= -->
 	<dependency>
 		<groupId>redis.clients</groupId>
 		<artifactId>jedis</artifactId>
@@ -36,7 +56,7 @@
 	<dependency>
 		<groupId>org.springframework.data</groupId>
 		<artifactId>spring-data-redis</artifactId>
-		<version>${version}</version>
+		<version>${spring.version}</version>
 	</dependency>
 	<!-- 
 	<dependency>
@@ -46,7 +66,9 @@
 	</dependency>
 	 -->
 
-	<!-- Log -->
+	<!-- ======================================= -->
+	<!-- 日志（Log）框架 -->
+	<!-- ======================================= -->
 	<dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
@@ -58,7 +80,9 @@
 		<version>1.1.2</version>
 	</dependency>
 
-	<!-- Test -->
+	<!-- ======================================= -->
+	<!-- 测试（Test）框架 -->
+	<!-- ======================================= -->
 	<dependency>
 		<groupId>org.testng</groupId>
 		<artifactId>testng</artifactId>
