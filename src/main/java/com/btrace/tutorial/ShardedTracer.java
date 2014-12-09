@@ -20,7 +20,7 @@ import com.sun.btrace.annotations.OnMethod;
 import com.sun.btrace.annotations.Self;
 
 /**
- * 追踪{@link redis.clients.util.Sharded}的实时状态。
+ * 追踪{@link redis.clients.util.Sharded Sharded}的实时状态。
  * 
  * <pre>
  * 【使用说明】
@@ -34,10 +34,10 @@ import com.sun.btrace.annotations.Self;
 @BTrace
 public class ShardedTracer {
 
-    @OnMethod(clazz = "redis.clients.util.Sharded", method = "initialize", location = @Location(Kind.RETURN))
-    public static void onLog(@Self Object obj) {
-        Field nodes = Reflective.field("redis.clients.util.Sharded", "nodes");
-        println(get(nodes, obj));
-    }
+	@OnMethod(clazz = "redis.clients.util.Sharded", method = "initialize", location = @Location(Kind.RETURN))
+	public static void onLog(@Self Object obj) {
+		Field nodes = Reflective.field("redis.clients.util.Sharded", "nodes");
+		println(get(nodes, obj));
+	}
 
 }
