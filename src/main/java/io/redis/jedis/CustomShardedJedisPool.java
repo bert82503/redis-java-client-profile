@@ -88,7 +88,6 @@ public class CustomShardedJedisPool extends Pool<ShardedJedis> {
 	@Override
 	public void returnResource(ShardedJedis resource) {
 		if (resource != null) {
-			resource.resetState();
 			this.returnResourceObject(resource);
 		}
 	}
