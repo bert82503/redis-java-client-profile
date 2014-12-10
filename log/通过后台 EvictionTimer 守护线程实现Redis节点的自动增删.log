@@ -1,0 +1,157 @@
+
+
+######
+## 通过后台 EvictionTimer 守护进程实现节点的自动增删
+######
+
+
+###
+# 所有节点都正常
+###
+13:24:12.055 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial Shard List: [127.0.0.1:6379*1, 127.0.0.1:6380*1, 127.0.0.1:6381*1]
+13:24:12.064 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial active Shard map: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+13:24:12.216 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:24:12.232 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 1
+13:24:15.161 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:17.233 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:24:17.235 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 2
+13:24:18.155 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:21.156 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:22.236 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+13:24:22.239 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 3
+13:24:24.156 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:27.156 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:27.239 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:24:27.241 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 4
+13:24:30.157 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:32.242 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:24:32.244 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 5
+13:24:33.156 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:36.157 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:37.245 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:24:37.247 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 6
+13:24:39.157 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:42.157 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:24:42.248 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:24:42.249 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 7
+PASSED: autoDetectBrokenRedisServer
+
+
+###
+# 6380节点 宕机后，中途恢复了
+#
+# 注意："正常活跃的Jedis分片节点信息列表"的顺序发生了改变，所以必须设置分片节点的逻辑名称！
+###
+13:28:34.245 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial Shard List: [127.0.0.1:6379*1, 127.0.0.1:6380*1, 127.0.0.1:6381*1]
+13:28:34.256 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial active Shard map: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+13:28:34.408 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:28:34.422 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 1
+# 探测到 6380节点 挂了
+13:28:37.350 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:28:37.352 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Remove a broken Redis server: 127.0.0.1:6380
+13:28:37.353 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List after a broken Redis server removed: [127.0.0.1:6381*1, 127.0.0.1:6379*1]
+# 6380节点的数据被映射到其它节点(6381)上
+13:28:39.422 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+13:28:39.424 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 2
+13:28:40.349 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:28:43.349 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:28:44.425 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+13:28:44.426 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 3
+# 探测到 6380节点 恢复正常了
+13:28:46.349 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:28:46.350 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Broken Redis server now is active: 127.0.0.1:6380*1
+# 注意："正常活跃的Jedis分片节点信息列表"的顺序发生了改变，所以必须设置分片节点的逻辑名称！
+13:28:46.350 [commons-pool-EvictionTimer] INFO  i.r.jedis.CustomShardedJedisFactory - Active Shard list after a return to normal node added: [127.0.0.1:6381*1, 127.0.0.1:6379*1, 127.0.0.1:6380*1]
+13:28:46.351 [commons-pool-EvictionTimer] INFO  i.r.jedis.CustomShardedJedisFactory - Active Shard map after a return to normal node added: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+# 6380节点 恢复后，原来的数据重新映射回该节点
+13:28:49.348 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:28:49.426 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:28:49.428 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 4
+13:28:52.349 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:28:54.429 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:28:54.431 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 5
+13:28:55.350 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,127.0.0.1:6380,}
+13:28:58.349 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,127.0.0.1:6380,}
+13:28:59.432 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:28:59.433 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 6
+13:29:01.350 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,127.0.0.1:6380,}
+13:29:04.349 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,127.0.0.1:6380,}
+13:29:04.433 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:29:04.436 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 7
+PASSED: autoDetectBrokenRedisServer
+
+###
+# 6380节点 一直宕机着，其上面的数据会落到其它节点上，但其它节点上的数据依旧落在原先所在的节点
+###
+13:39:43.154 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial Shard List: [127.0.0.1:6379*1, 127.0.0.1:6380*1, 127.0.0.1:6381*1]
+13:39:43.164 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial active Shard map: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+13:39:43.320 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:39:43.334 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 1
+# 探测到 6380节点 挂了
+13:39:46.265 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:39:46.266 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Remove a broken Redis server: 127.0.0.1:6380
+13:39:46.267 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List after a broken Redis server removed: [127.0.0.1:6381*1, 127.0.0.1:6379*1]
+# 6380节点的数据被映射到其它节点(6381)上
+13:39:48.334 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+13:39:48.337 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 2
+13:39:49.260 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:39:52.260 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:39:53.338 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+13:39:53.339 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 3
+13:39:55.259 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:39:58.260 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+# 6380节点的数据被映射到其它节点(6379)上
+13:39:58.340 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:39:58.342 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 4
+13:40:01.260 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:40:03.343 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:40:03.344 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 5
+13:40:04.260 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:40:07.260 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:40:08.345 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:40:08.346 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 6
+13:40:10.261 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:40:13.262 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+13:40:13.347 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:40:13.349 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 7
+PASSED: autoDetectBrokenRedisServer
+
+
+###
+# 6379节点 宕机后，中途恢复了，但途中没有请求的数据落到这台节点上，不会导致数据重分布(rehash)
+###
+13:48:38.547 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial Shard List: [127.0.0.1:6379*1, 127.0.0.1:6380*1, 127.0.0.1:6381*1]
+13:48:38.555 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial active Shard map: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+13:48:38.707 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:48:38.721 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 1
+# 探测到 6379节点 挂了
+13:48:41.654 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+13:48:41.656 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Remove a broken Redis server: 127.0.0.1:6379
+13:48:41.656 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List after a broken Redis server removed: [127.0.0.1:6381*1, 127.0.0.1:6380*1]
+13:48:43.722 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:48:43.724 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 2
+13:48:44.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,}
+13:48:47.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,}
+13:48:48.725 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+13:48:48.728 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 3
+# 探测到 6379节点 恢复正常了
+13:48:50.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,}
+13:48:50.651 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Broken Redis server now is active: 127.0.0.1:6379*1
+13:48:50.651 [commons-pool-EvictionTimer] INFO  i.r.jedis.CustomShardedJedisFactory - Active Shard list after a return to normal node added: [127.0.0.1:6381*1, 127.0.0.1:6380*1, 127.0.0.1:6379*1]
+13:48:50.652 [commons-pool-EvictionTimer] INFO  i.r.jedis.CustomShardedJedisFactory - Active Shard map after a return to normal node added: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+13:48:53.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,}
+13:48:53.728 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+13:48:53.730 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 4
+13:48:56.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,}
+13:48:58.731 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:48:58.733 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 5
+13:48:59.649 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,127.0.0.1:6379,}
+13:49:02.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,127.0.0.1:6379,}
+13:49:03.734 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:49:03.736 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 6
+13:49:05.648 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,127.0.0.1:6379,}
+13:49:08.649 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6380,127.0.0.1:6379,}
+13:49:08.736 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+13:49:08.739 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 7
+PASSED: autoDetectBrokenRedisServer
+

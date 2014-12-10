@@ -40,8 +40,6 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
     private Hashing                               algo;
     /** 键标记模式 */
     private Pattern                               keyTagPattern;
-    /** 初始节点个数 */
-    private final int                             initialShardNumber;
 
     /** 正常活跃的Jedis分片节点信息映射表(<host:port, JedisShardInfo>) */
     private ConcurrentMap<String, JedisShardInfo> activeShardMap;
@@ -59,7 +57,6 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
         this.shards = shards;
         this.algo = algo;
         this.keyTagPattern = keyTagPattern;
-        this.initialShardNumber = this.shards.size();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Initial Shard List: {}", this.shards);
@@ -119,72 +116,60 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
         Jedis jedis = null;
         try {
             ShardedJedis shardedJedis = pooledShardedJedis.getObject();
-
-            // 每次校验"Jedis集群池对象"有效性时，都会对所有Redis服务器进行"PING命令"请求，这样是很耗时的！
-            List<Jedis> shards = new ArrayList<Jedis>(shardedJedis.getAllShards());
+            List<Jedis> activeShards = new ArrayList<Jedis>(shardedJedis.getAllShards());
             if (logger.isDebugEnabled()) {
-                logger.debug("Active Shard List for current validated sharded Jedis: {}", listShardsToString(shards));
+                logger.debug("Active Shard List for current validated sharded Jedis: {}",
+                             listShardsToString(activeShards));
             }
 
-            int size = shards.size();
-            for (int i = 0; i < size; i++) {
-                jedis = shards.get(i);
-                if (!jedis.ping().equals("PONG")) { // PING 命令
-                    return false;
-                }
-            }
-
-            // broken server 自动探测
-            if (initialShardNumber > shards.size() && !brokenShardMap.isEmpty()) {
-                boolean hasNormalShard = false;
+            // 1. broken Redis server 自动探测"是否已恢复正常"，并自动添加恢复正常的Redis节点
+            if (!brokenShardMap.isEmpty()) {
                 for (Jedis shard : brokenShardMap.keySet()) {
                     try {
                         if (shard.ping().equals("PONG")) { // PING 命令
-                            // 探测到一个异常节点现在恢复了
-                            // JedisShardInfo normalShard = brokenShardMap.remove(shard);
-                            JedisShardInfo normalShard = brokenShardMap.get(shard);
-                            logger.warn("Broken Shard server now is normal: {}", normalShard);
-                            if (initialShardNumber > this.shards.size()) {
-                                this.shards.add(normalShard);
-                                String shardKey = generateShardKey(normalShard.getHost(), normalShard.getPort());
-                                this.activeShardMap.put(shardKey, normalShard);
+                            // 探测到一个异常节点现在恢复正常了
+                            JedisShardInfo activeShard = brokenShardMap.remove(shard);
+                            if (null != activeShard) {
+                                logger.warn("Broken Redis server now is active: {}", activeShard);
+
+                                shards.add(activeShard);
+                                String shardKey = generateShardKey(activeShard.getHost(), activeShard.getPort());
+                                activeShardMap.put(shardKey, activeShard);
 
                                 if (logger.isDebugEnabled()) {
-                                    logger.info("Active Shard list after a return to normal node added: {}",
-                                                this.shards);
+                                    logger.info("Active Shard list after a return to normal node added: {}", shards);
                                     logger.info("Active Shard map after a return to normal node added: {}",
-                                                this.activeShardMap);
+                                                activeShardMap);
                                 }
                             }
-                            hasNormalShard = true;
                         }
                     } catch (Exception e) {
                         // 探测异常的节点，抛异常是正常行为，忽略之。
                         // logger.warn("Failed to detect to Broken Shard", e);
                     }
                 }
-                if (hasNormalShard) {
+            }
+
+            // 2. 检测是否有恢复正常的节点添加进来了
+            if (activeShardMap.size() > activeShards.size()) {
+                return false;
+            }
+
+            // 3. 每次校验"Jedis集群池对象"有效性时，都会对所有当前正常的Redis服务器进行"PING命令"请求，这样是很耗时的！
+            int size = activeShards.size();
+            for (int i = 0; i < size; i++) {
+                jedis = activeShards.get(i);
+                if (!jedis.ping().equals("PONG")) { // PING 命令
                     return false;
                 }
             }
 
             return true;
         } catch (Exception ex) {
-            // 摘除出现异常的Redis节点
+            // 4. 自动摘除出现异常的Redis节点
             this.removeShard(jedis);
             return false;
         }
-    }
-
-    private static String listShardsToString(List<Jedis> shards) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('{');
-        for (Jedis jedis : shards) {
-            Client client = jedis.getClient();
-            sb.append(client.getHost()).append(':').append(client.getPort()).append(',');
-        }
-        sb.append('}');
-        return sb.toString();
     }
 
     /**
@@ -205,6 +190,17 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
                 logger.debug("Active Shard List after a broken Redis server removed: {}", shards);
             }
         }
+    }
+
+    private static String listShardsToString(List<Jedis> shards) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (Jedis jedis : shards) {
+            Client client = jedis.getClient();
+            sb.append(client.getHost()).append(':').append(client.getPort()).append(',');
+        }
+        sb.append('}');
+        return sb.toString();
     }
 
     /**
