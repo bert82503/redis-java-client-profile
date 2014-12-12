@@ -38,7 +38,9 @@ PASSED: autoDetectBrokenRedisServer
 
 
 ###
-# 6380节点 宕机后，中途恢复了
+# 6380节点 宕机后，中途恢复了（EvictionTimer守护线程的调度间隔时间 < 应用执行的间隔时间）
+#
+# 当 EvictionTimer守护线程的调度间隔时间 < 应用执行的间隔时间 时，客户端执行请求命令时不会抛异常！
 #
 # 注意："正常活跃的Jedis分片节点信息列表"的顺序发生了改变，所以必须设置分片节点的逻辑名称！
 ###
@@ -79,6 +81,157 @@ PASSED: autoDetectBrokenRedisServer
 13:29:04.433 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
 13:29:04.436 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 7
 PASSED: autoDetectBrokenRedisServer
+
+
+###
+# 6380节点 宕机后，中途恢复了（EvictionTimer守护线程的调度间隔时间 > 应用执行的间隔时间）
+#
+# 当 EvictionTimer守护线程的调度间隔时间 > 应用执行的间隔时间 时，客户端执行请求命令时会抛异常！
+###
+17:32:52.459 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial Shard List: [127.0.0.1:6379*1, 127.0.0.1:6380*1, 127.0.0.1:6381*1]
+17:32:52.467 [main] DEBUG i.r.jedis.CustomShardedJedisFactory - Initial active Shard map: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+17:32:52.616 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+17:32:52.630 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 1
+# 6380节点 中途挂了
+17:32:55.631 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+17:32:55.642 [main] WARN  i.r.c.CustomShardedJedisPoolTest - Failed to operate on Jedis Client
+# 探测到服务端关闭链接了
+redis.clients.jedis.exceptions.JedisConnectionException: It seems like server has closed the connection.
+  at redis.clients.util.RedisInputStream.readLine(RedisInputStream.java:90) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Protocol.processStatusCodeReply(Protocol.java:152) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Protocol.process(Protocol.java:141) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Protocol.read(Protocol.java:202) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Connection.readProtocolWithCheckingBroken(Connection.java:285) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Connection.getStatusCodeReply(Connection.java:184) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Jedis.set(Jedis.java:63) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.ShardedJedis.set(ShardedJedis.java:39) ~[jedis-2.6.0.jar:na]
+  at io.redis.client.CustomShardedJedisPoolTest.autoDetectBrokenRedisServer(CustomShardedJedisPoolTest.java:144) ~[classes/:na]
+  at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.7.0_45]
+  at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) ~[na:1.7.0_45]
+  at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.7.0_45]
+  at java.lang.reflect.Method.invoke(Method.java:606) ~[na:1.7.0_45]
+  at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:84) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.Invoker.invokeMethod(Invoker.java:714) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:901) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1231) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:127) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:111) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestRunner.privateRun(TestRunner.java:767) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestRunner.run(TestRunner.java:617) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.runTest(SuiteRunner.java:334) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:329) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.privateRun(SuiteRunner.java:291) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.run(SuiteRunner.java:240) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestNG.runSuitesLocally(TestNG.java:1149) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestNG.run(TestNG.java:1057) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.remote.RemoteTestNG.run(RemoteTestNG.java:111) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:204) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:175) [testng.jar:6.8.7beta-201309140723]
+17:32:55.643 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 2
+# 6380节点 出异常期间，若访问数据落到其它节点(6381)上，还是正常执行
+17:32:58.644 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+17:32:58.646 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 3
+# 访问数据再次落到 异常的6380节点，但EvictionTimer守护线程依旧还未最新执行，所以继续抛异常
+17:33:01.647 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+17:33:01.649 [main] WARN  i.r.c.CustomShardedJedisPoolTest - Failed to operate on Jedis Client
+# 客户端请求连接被拒绝，因为服务端已经挂了，无法响应
+redis.clients.jedis.exceptions.JedisConnectionException: java.net.ConnectException: 拒绝连接
+  at redis.clients.jedis.Connection.connect(Connection.java:150) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.BinaryClient.connect(BinaryClient.java:75) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Connection.sendCommand(Connection.java:79) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.BinaryClient.set(BinaryClient.java:92) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Client.set(Client.java:24) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.Jedis.set(Jedis.java:62) ~[jedis-2.6.0.jar:na]
+  at redis.clients.jedis.ShardedJedis.set(ShardedJedis.java:39) ~[jedis-2.6.0.jar:na]
+  at io.redis.client.CustomShardedJedisPoolTest.autoDetectBrokenRedisServer(CustomShardedJedisPoolTest.java:144) ~[classes/:na]
+  at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.7.0_45]
+  at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) ~[na:1.7.0_45]
+  at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:1.7.0_45]
+  at java.lang.reflect.Method.invoke(Method.java:606) ~[na:1.7.0_45]
+  at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:84) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.Invoker.invokeMethod(Invoker.java:714) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:901) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1231) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:127) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:111) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestRunner.privateRun(TestRunner.java:767) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestRunner.run(TestRunner.java:617) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.runTest(SuiteRunner.java:334) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:329) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.privateRun(SuiteRunner.java:291) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunner.run(SuiteRunner.java:240) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestNG.runSuitesLocally(TestNG.java:1149) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.TestNG.run(TestNG.java:1057) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.remote.RemoteTestNG.run(RemoteTestNG.java:111) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:204) [testng.jar:6.8.7beta-201309140723]
+  at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:175) [testng.jar:6.8.7beta-201309140723]
+Caused by: java.net.ConnectException: 拒绝连接
+  at java.net.PlainSocketImpl.socketConnect(Native Method) ~[na:1.7.0_45]
+  at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339) ~[na:1.7.0_45]
+  at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200) ~[na:1.7.0_45]
+  at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182) ~[na:1.7.0_45]
+  at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392) ~[na:1.7.0_45]
+  at java.net.Socket.connect(Socket.java:579) ~[na:1.7.0_45]
+  at redis.clients.jedis.Connection.connect(Connection.java:144) ~[jedis-2.6.0.jar:na]
+  ... 31 common frames omitted
+17:33:01.650 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 4
+# EvictionTimer守护线程现在运行了，并检测到 6380节点连接不上了，自动摘除该节点
+17:33:02.565 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+17:33:02.567 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Remove a broken Redis server: 127.0.0.1:6380
+17:33:02.567 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List after a broken Redis server removed: [127.0.0.1:6381*1, 127.0.0.1:6379*1]
+17:33:04.651 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:04.653 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 5
+# 其它Jedis池对象也陆续发现有节点异常了
+17:33:07.559 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381,}
+17:33:07.561 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Find a pooled sharded Jedis is broken
+17:33:07.654 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:07.655 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 6
+17:33:10.656 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:10.657 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 7
+17:33:12.559 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+17:33:13.658 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:13.659 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 8
+17:33:16.659 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+17:33:16.662 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 9
+# EvictionTimer守护线程现在又运行了，并检测到 6380节点恢复正常了，自动添加该节点
+17:33:17.560 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+17:33:17.562 [commons-pool-EvictionTimer] WARN  i.r.jedis.CustomShardedJedisFactory - Broken Redis server now is active: 127.0.0.1:6380*1
+17:33:17.563 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard list after a return to normal node added: [127.0.0.1:6381*1, 127.0.0.1:6379*1, 127.0.0.1:6380*1]
+17:33:17.563 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard map after a return to normal node added: {127.0.0.1:6381=127.0.0.1:6381*1, 127.0.0.1:6379=127.0.0.1:6379*1, 127.0.0.1:6380=127.0.0.1:6380*1}
+# 发现Jedis池对象的节点信息有些旧，更新到最新状态
+17:33:17.564 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Find a pooled sharded Jedis is updated
+17:33:19.663 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6381*1
+17:33:19.665 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 10
+# 发现又有Jedis池对象的节点信息有些旧，更新到最新状态
+17:33:22.561 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+17:33:22.561 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Find a pooled sharded Jedis is updated
+17:33:22.666 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:22.667 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 11
+17:33:25.668 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:25.668 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 12
+17:33:27.560 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,127.0.0.1:6380,}
+# 访问数据重新落到 6380节点
+17:33:28.669 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+17:33:28.671 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 13
+17:33:31.672 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+17:33:31.673 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 14
+17:33:32.560 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,127.0.0.1:6380,}
+17:33:34.673 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:34.675 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 15
+# 发现还有Jedis池对象的节点信息有些旧，更新到最新状态
+17:33:37.561 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Active Shard List for current validated sharded Jedis: {127.0.0.1:6381,127.0.0.1:6379,}
+17:33:37.562 [commons-pool-EvictionTimer] DEBUG i.r.jedis.CustomShardedJedisFactory - Find a pooled sharded Jedis is updated
+17:33:37.676 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6379*1
+17:33:37.678 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 16
+17:33:40.679 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Shard Info: 127.0.0.1:6380*1
+17:33:40.681 [main] INFO  i.r.c.CustomShardedJedisPoolTest - Complete time: 17
+
 
 ###
 # 6380节点 一直宕机着，其上面的数据会落到其它节点上，但其它节点上的数据依旧落在原先所在的节点

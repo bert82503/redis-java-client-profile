@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.apache.commons.pool2.PooledObject;
@@ -23,6 +24,7 @@ import redis.clients.jedis.Client;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.util.Hashing;
 
 /**
@@ -41,6 +43,9 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
     /** 键标记模式 */
     private Pattern                               keyTagPattern;
 
+    /*
+     * "异常节点的自动摘除和恢复添加"维护表
+     */
     /** 正常活跃的Jedis分片节点信息映射表(<host:port, JedisShardInfo>) */
     private ConcurrentMap<String, JedisShardInfo> activeShardMap;
     /** 异常的Jedis分片节点列表 */
@@ -114,58 +119,67 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
     @Override
     public boolean validateObject(PooledObject<ShardedJedis> pooledShardedJedis) {
         Jedis jedis = null;
-        try {
-            ShardedJedis shardedJedis = pooledShardedJedis.getObject();
-            List<Jedis> activeShards = new ArrayList<Jedis>(shardedJedis.getAllShards());
-            if (logger.isDebugEnabled()) {
-                logger.debug("Active Shard List for current validated sharded Jedis: {}",
-                             listShardsToString(activeShards));
-            }
 
-            // 1. broken Redis server 自动探测"是否已恢复正常"，并自动添加恢复正常的Redis节点
-            if (!brokenShardMap.isEmpty()) {
-                for (Jedis shard : brokenShardMap.keySet()) {
-                    try {
-                        if (shard.ping().equals("PONG")) { // PING 命令
-                            // 探测到一个异常节点现在恢复正常了
-                            JedisShardInfo activeShard = brokenShardMap.remove(shard);
-                            if (null != activeShard) {
-                                logger.warn("Broken Redis server now is active: {}", activeShard);
+        ShardedJedis shardedJedis = pooledShardedJedis.getObject();
+        List<Jedis> activeShards = new ArrayList<Jedis>(shardedJedis.getAllShards());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Active Shard List for current validated sharded Jedis: {}", listShardsToString(activeShards));
+        }
 
-                                shards.add(activeShard);
-                                String shardKey = generateShardKey(activeShard.getHost(), activeShard.getPort());
-                                activeShardMap.put(shardKey, activeShard);
+        // 1. broken server 自动探测"是否已恢复正常"，并自动添加恢复正常的Redis节点
+        if (!brokenShardMap.isEmpty()) {
+            AtomicInteger brokenToActiveCounter = new AtomicInteger(0);
+            for (Jedis shard : brokenShardMap.keySet()) {
+                try {
+                    if (shard.ping().equals("PONG")) {
+                        // 探测到一个异常节点现在恢复正常了
+                        JedisShardInfo activeShard = brokenShardMap.remove(shard);
+                        if (null != activeShard) {
+                            logger.warn("Broken Redis server now is active: {}", activeShard);
 
-                                if (logger.isDebugEnabled()) {
-                                    logger.info("Active Shard list after a return to normal node added: {}", shards);
-                                    logger.info("Active Shard map after a return to normal node added: {}",
-                                                activeShardMap);
-                                }
+                            shards.add(activeShard);
+                            String shardKey = generateShardKey(activeShard.getHost(), activeShard.getPort());
+                            activeShardMap.put(shardKey, activeShard);
+                            brokenToActiveCounter.incrementAndGet();
+
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Active Shard list after a return to normal node added: {}", shards);
+                                logger.debug("Active Shard map after a return to normal node added: {}", activeShardMap);
                             }
                         }
-                    } catch (Exception e) {
-                        // 探测异常的节点，抛异常是正常行为，忽略之。
-                        // logger.warn("Failed to detect to Broken Shard", e);
                     }
+                } catch (JedisConnectionException e) {
+                    // 探测异常的节点，抛异常是正常行为，忽略之
                 }
             }
-
-            // 2. 检测是否有恢复正常的节点添加进来了
-            if (activeShardMap.size() > activeShards.size()) {
+            if (brokenToActiveCounter.get() > 0) {
+                // 有节点恢复正常了
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Find a pooled sharded Jedis is updated");
+                }
                 return false;
             }
+        }
 
-            // 3. 每次校验"Jedis集群池对象"有效性时，都会对所有当前正常的Redis服务器进行"PING命令"请求，这样是很耗时的！
+        // 2. 检测是否有恢复正常的节点添加进来了
+        if (activeShardMap.size() > activeShards.size()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Find a pooled sharded Jedis is updated");
+            }
+            return false;
+        }
+
+        // 3. 每次校验"Jedis集群池对象"有效性时，都会对所有当前正常的Redis服务器进行"PING命令"请求，这样是很耗时的！
+        try {
             int size = activeShards.size();
             for (int i = 0; i < size; i++) {
                 jedis = activeShards.get(i);
-                if (!jedis.ping().equals("PONG")) { // PING 命令
+                if (!jedis.ping().equals("PONG")) {
                     return false;
                 }
             }
-
             return true;
-        } catch (Exception ex) {
+        } catch (JedisConnectionException ex) {
             // 4. 自动摘除出现异常的Redis节点
             this.removeShard(jedis);
             return false;
@@ -173,14 +187,17 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
     }
 
     /**
-     * 从集群中摘除异常的"Redis节点"。
+     * 从集群中摘除异常的"Redis节点"，且只会被摘除一次。
      */
     private void removeShard(Jedis jedis) {
+        // 1. 关闭Jedis客户端链接
         Client redisClient = jedis.getClient();
         redisClient.close();
+
+        // 2. 将异常节点从活跃的Shard列表中移除，并放入到异常的Shard列表中，等待恢复后添加
         String shardKey = generateShardKey(redisClient.getHost(), redisClient.getPort());
         JedisShardInfo shard = activeShardMap.remove(shardKey);
-        if (null != shard) { // 节点已不在活跃节点列表中，这样保证只会被移出一次
+        if (null != shard) { // 节点已不在活跃节点列表中，这样保证只会被移除一次
             logger.warn("Remove a broken Redis server: {}", shardKey);
 
             shards = new ArrayList<JedisShardInfo>(activeShardMap.values());
@@ -188,6 +205,10 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Active Shard List after a broken Redis server removed: {}", shards);
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Find a pooled sharded Jedis is broken");
             }
         }
     }
