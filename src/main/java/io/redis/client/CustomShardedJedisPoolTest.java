@@ -66,14 +66,14 @@ public class CustomShardedJedisPoolTest {
         poolConfig.setMaxTotal(32768);
         poolConfig.setMaxIdle(32768);
         poolConfig.setMinIdle(20);
-        // poolConfig.setMinIdle(3); // local test
+//         poolConfig.setMinIdle(3); // local test
         // 非阻塞
         poolConfig.setBlockWhenExhausted(false);
         // 阻塞等待一段时间
         // poolConfig.setBlockWhenExhausted(true);
         // poolConfig.setMaxWaitMillis(TimeUnit.MILLISECONDS.toMillis(10L));
 
-        // 关闭"在借用池对象时，检测其有效性"，因为这样对性能影响较大
+        // 关闭"在借用或返回池对象时，检测其有效性"（因为这样对性能影响较大）
         poolConfig.setTestOnBorrow(false);
         poolConfig.setTestOnReturn(false);
 
@@ -81,7 +81,7 @@ public class CustomShardedJedisPoolTest {
          * "EvictionTimer守护线程"相关配置，用它来检测"空闲对象"
          */
         poolConfig.setTestWhileIdle(true);
-        // 每隔5秒钟执行一次
+        // 每隔5秒钟执行一次，保证异常节点被及时探测到（具体隔多久调度一次，根据业务需求来定）
         poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(5L));
         // 模拟关闭后台EvictionTimer守护线程
         // poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(500L));
@@ -99,6 +99,8 @@ public class CustomShardedJedisPoolTest {
         AbandonedConfig abandonedConfig = new AbandonedConfig();
         abandonedConfig.setRemoveAbandonedOnMaintenance(true);
         abandonedConfig.setRemoveAbandonedTimeout((int) TimeUnit.MINUTES.toSeconds(5L));
+//        abandonedConfig.setRemoveAbandonedTimeout((int) TimeUnit.SECONDS.toSeconds(20L)); // local test
+        abandonedConfig.setLogAbandoned(true);
         abandonedConfig.setRemoveAbandonedOnBorrow(false);
         this.pool.setAbandonedConfig(abandonedConfig);
     }
@@ -161,6 +163,11 @@ public class CustomShardedJedisPoolTest {
                 assertEquals(statusCode, RET_OK);
                 // 返回连接到连接池
                 jedis.close();
+                
+//                // 关闭第一个处理节点(6380)的服务端连接，但第二次请求又会重新连接上
+//                if (1 == i) {
+//                    JedisUtils.clientKill(jedis.getShard(key));
+//                }
             } catch (JedisException je) {
                 String errorMsg = String.format("Failed to operate on '%s' Jedis Client", shardInfo);
                 logger.warn(errorMsg, je);
