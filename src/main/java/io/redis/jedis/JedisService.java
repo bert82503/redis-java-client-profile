@@ -11,13 +11,33 @@ package io.redis.jedis;
  */
 public interface JedisService {
 
-	/*
-	 * Lists at http://redis.io/commands#list
-	 * 
-	 * List是一个双向链表，支持双向的Pop/Push。
-	 * 所有操作都是O(1)的好孩子，可以当Message Queue来用。
-	 * 任务队列系统Resque是其典型应用。
-	 */
+    // =======================================================
+    // Key (键) - http://redis.io/commands#generic
+    // Key不能太长，比如1024字节，但antirez也不喜欢太短如"u:1000:pwd"，要表达清楚意思才好。
+    // 他私人建议用":"分隔域，用"."作为单词间的连接，如"comment:12345:reply.to"。
+    // =======================================================
+    /**
+     * Set a timeout on key. (设置键的超时时间)
+     * <p>
+     * After the timeout has expired, the key will automatically be deleted. A key with an associated timeout is often
+     * said to be volatile in Redis terminology. (当键超时过期后，会被自动删除)
+     * <p>
+     * The timeout is cleared only when the key is removed using the DEL command or overwritten using the SET or GETSET
+     * commands. This means that all the operations that conceptually alter the value stored at the key without
+     * replacing it with a new one will leave the timeout untouched. <br>
+     * (仅当键被DEL命令删除或者被SET或GETSET命令覆盖时，键的超时时间才会被清除)
+     * 
+     * @param key
+     * @param seconds
+     * @return
+     */
+    long expire(String key, int seconds);
+
+    // =======================================================
+    // List (列表) - http://redis.io/commands#list
+    // List是一个双向链表，支持双向的Pop/Push。
+    // 所有操作都是O(1)的好孩子，可以当Message Queue来用。
+    // =======================================================
 	/**
 	 * Returns the length of the list stored at key.
 	 * <p>
@@ -32,9 +52,9 @@ public interface JedisService {
 	 */
 	long llen(String key);
 	
-	// 江湖规矩一般从左端Push，右端Pop——LPush/RPop
+	// 江湖规矩一般从"左端Push，右端Pop——LPush/RPop"
 	/**
-	 * Insert all the specified values at the head of the list stored at key. (插到链表头部)
+	 * Insert all the specified values at the head of the list stored at key. (插入到链表头部)
 	 * <p>
 	 * If key does not exist, it is created as empty list before performing the push operations. 
 	 * When key holds a value that is not a list, an error is returned.
