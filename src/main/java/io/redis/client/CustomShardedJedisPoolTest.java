@@ -8,6 +8,7 @@
 package io.redis.client;
 
 import static org.testng.Assert.assertEquals;
+import io.redis.common.JedisUtils;
 import io.redis.jedis.CustomShardedJedisPool;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
@@ -82,9 +84,9 @@ public class CustomShardedJedisPoolTest {
          */
         poolConfig.setTestWhileIdle(true);
         // 每隔5秒钟执行一次，保证异常节点被及时探测到（具体隔多久调度一次，根据业务需求来定）
-        poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(5L));
+        poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(3L));
         // 模拟关闭后台EvictionTimer守护线程
-        // poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(500L));
+//        poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(500L)); // local test
         // 每次检测10个空闲对象
         poolConfig.setNumTestsPerEvictionRun(10);
         // 当池对象的空闲时间超过该值时，就被纳入到驱逐检测范围
@@ -135,20 +137,69 @@ public class CustomShardedJedisPoolTest {
 
     private static final String RET_OK       = "OK";
 
-    private static final int    SIZE         = 17;
+    /**
+     * 验证"当集群中的某些节点出现异常(宕机)时，不影响其它节点数据的正常访问"功能。
+     * <p>
+     * <font color="red">注意：</font>将{@link GenericObjectPoolConfig#setTimeBetweenEvictionRunsMillis(long)}设置为{@code 500L}。
+     * 
+     * @throws InterruptedException 
+     */
+    @Test(enabled = false,
+            description = "验证\"当集群中的某些节点出现异常(宕机)时，不影响其它节点数据的正常访问\"功能")
+    public void accessOtherShardsNormally() throws InterruptedException {
+        ShardedJedis jedis = null;
+        JedisShardInfo shardInfo = null;
+        String key = null;
+
+        int size = 5;
+        for (int i = 1; i <= size; i++) {
+            key = "st_" + i;
+
+            try {
+                // 获取一条Redis连接
+                jedis = this.pool.getResource();
+
+                // log Shard info
+                shardInfo = jedis.getShardInfo(key);
+                logger.info("Shard Info: " + shardInfo);
+
+                String statusCode = jedis.set(key, DEFAUL_VALUE);
+                assertEquals(statusCode, RET_OK);
+                // 返回连接到连接池
+                jedis.close();
+
+                // 关闭第一个被访问到的Redis服务器，模拟Redis服务器宕机的场景
+                if (1 == i) {
+                    Jedis client = jedis.getShard(key);
+                    statusCode = client.shutdown();
+                    assertEquals(statusCode, null); // 不返回任何响应信息
+                }
+
+            } catch (JedisException je) {
+                String errorMsg = String.format("Failed to operate on '%s' Jedis Client", shardInfo);
+                logger.warn(errorMsg, je);
+            }
+
+            logger.info("Complete time: {}", Integer.valueOf(i));
+            if (i < size) {
+                TimeUnit.SECONDS.sleep(3L);
+            }
+        }
+    }
 
     /**
-     * 测试"自动摘除阻塞异常(宕机)的Redis服务器，自动添加恢复正常的Redis服务器"功能。
+     * 验证"自动摘除异常(宕机)的Redis服务器，自动添加恢复正常的Redis服务器"功能。
      * 
      * @throws InterruptedException
      */
-    @Test
+    @Test(description = "验证\"自动摘除异常(宕机)的Redis服务器，自动添加恢复正常的Redis服务器\"功能")
     public void autoDetectBrokenRedisServer() throws InterruptedException {
         ShardedJedis jedis = null;
         JedisShardInfo shardInfo = null;
         String key = null;
 
-        for (int i = 1; i <= SIZE; i++) {
+        int size = 5;
+        for (int i = 1; i <= size; i++) {
             key = "st_" + i;
 
             try {
@@ -164,18 +215,19 @@ public class CustomShardedJedisPoolTest {
                 // 返回连接到连接池
                 jedis.close();
                 
-//                // 关闭第一个处理节点(6380)的服务端连接，但第二次请求又会重新连接上
-//                if (1 == i) {
-//                    JedisUtils.clientKill(jedis.getShard(key));
-//                }
+                // 关闭处理节点的服务端连接，模拟Redis服务器出现异常(宕机)的场景，便于驱逐者定时器自动摘除异常(宕机)的Redis服务器
+                // 但第二次请求又会重新连接上，模拟异常Redis服务器恢复正常的场景，便于驱逐者定时器自动添加恢复正常的Redis服务器
+                if (1 == i) {
+                    JedisUtils.clientKill(jedis.getShard(key));
+                }
             } catch (JedisException je) {
                 String errorMsg = String.format("Failed to operate on '%s' Jedis Client", shardInfo);
                 logger.warn(errorMsg, je);
             }
 
             logger.info("Complete time: {}", Integer.valueOf(i));
-            if (i < SIZE) {
-                TimeUnit.SECONDS.sleep(3L);
+            if (i < size) {
+                TimeUnit.SECONDS.sleep(5L);
             }
         }
     }

@@ -95,6 +95,10 @@ public class CustomShardedJedisPool extends Pool<ShardedJedis> {
     @Override
     public void returnResource(ShardedJedis resource) {
         if (resource != null) {
+            // FIXME ShardedJedis calls resetState twice when using with ShardedJedisPool (Fixes #811) (Jedis 2.6.2)
+            // Pull Request at https://github.com/xetorthio/jedis/pull/822
+            // 如果Jedis客户端升级到2.6.2版本及以上版本时，需要确认一下是否需要打开下面这行代码！
+//            resource.resetState();
             this.returnResourceObject(resource);
         }
     }
