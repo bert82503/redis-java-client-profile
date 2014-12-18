@@ -47,9 +47,6 @@ public class CustomShardedJedisPoolTest {
 
     @BeforeClass
     public void init() throws InterruptedException {
-        // used to BTrace
-        // TimeUnit.SECONDS.sleep(20L);
-
         // 获取 twemproxy 服务器列表
         List<HostAndPort> hosts = this.getHostList(ServerFlag.REDIS);
 
@@ -61,7 +58,6 @@ public class CustomShardedJedisPoolTest {
                                                           shardName);
             shards.add(shardInfo);
         }
-        // logger.info("Shard List: " + shards);
 
         GenericObjectPoolConfig poolConfig = new JedisPoolConfig();
         // 高并发压测
@@ -75,29 +71,29 @@ public class CustomShardedJedisPoolTest {
         // poolConfig.setBlockWhenExhausted(true);
         // poolConfig.setMaxWaitMillis(TimeUnit.MILLISECONDS.toMillis(10L));
 
-        // 关闭"在借用或返回池对象时，检测其有效性"（因为这样对性能影响较大）
+        // 关闭"在借用或返回池对象时，检测其有效性"（因为它会对集群中的所有节点发送PING命令，对性能影响较大）
         poolConfig.setTestOnBorrow(false);
         poolConfig.setTestOnReturn(false);
 
         /*
-         * "EvictionTimer守护线程"相关配置，用它来检测"空闲对象"
+         * "EvictionTimer守护线程"的相关配置，用它来维护"空闲对象"列表和保证集群节点的有效性
          */
         poolConfig.setTestWhileIdle(true);
         // 每隔5秒钟执行一次，保证异常节点被及时探测到（具体隔多久调度一次，根据业务需求来定）
         poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(3L));
         // 模拟关闭后台EvictionTimer守护线程
 //        poolConfig.setTimeBetweenEvictionRunsMillis(TimeUnit.SECONDS.toMillis(500L)); // local test
-        // 每次检测10个空闲对象
+        // 每次检测10个空闲池对象
         poolConfig.setNumTestsPerEvictionRun(10);
-        // 当池对象的空闲时间超过该值时，就被纳入到驱逐检测范围
+        // 当池对象的空闲时间超过该值时，就被纳入到驱逐检测对象的范围里
         poolConfig.setSoftMinEvictableIdleTimeMillis(TimeUnit.MINUTES.toMillis(30L));
         // 池的最小驱逐空闲时间(空闲驱逐时间)
-        // 当池对象的空闲时间超过该值时，立马被驱逐
+        // 当池对象的空闲时间超过该值时，会被立刻驱逐并销毁
         poolConfig.setMinEvictableIdleTimeMillis(TimeUnit.DAYS.toMillis(1L));
 
         this.pool = new CustomShardedJedisPool(poolConfig, shards);
 
-        // 池对象废弃策略
+        // "池对象废弃策略"配置信息
         AbandonedConfig abandonedConfig = new AbandonedConfig();
         abandonedConfig.setRemoveAbandonedOnMaintenance(true);
         abandonedConfig.setRemoveAbandonedTimeout((int) TimeUnit.MINUTES.toSeconds(5L));
@@ -138,11 +134,9 @@ public class CustomShardedJedisPoolTest {
     private static final String RET_OK       = "OK";
 
     /**
-     * 验证"当集群中的某些节点出现异常(宕机)时，不影响其它节点数据的正常访问"功能。
-     * <p>
      * <font color="red">注意：</font>将{@link GenericObjectPoolConfig#setTimeBetweenEvictionRunsMillis(long)}设置为{@code 500L}。
      * 
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     @Test(enabled = false,
             description = "验证\"当集群中的某些节点出现异常(宕机)时，不影响其它节点数据的正常访问\"功能")
@@ -187,11 +181,6 @@ public class CustomShardedJedisPoolTest {
         }
     }
 
-    /**
-     * 验证"自动摘除异常(宕机)的Redis服务器，自动添加恢复正常的Redis服务器"功能。
-     * 
-     * @throws InterruptedException
-     */
     @Test(description = "验证\"自动摘除异常(宕机)的Redis服务器，自动添加恢复正常的Redis服务器\"功能")
     public void autoDetectBrokenRedisServer() throws InterruptedException {
         ShardedJedis jedis = null;
@@ -216,7 +205,7 @@ public class CustomShardedJedisPoolTest {
                 jedis.close();
                 
                 // 关闭处理节点的服务端连接，模拟Redis服务器出现异常(宕机)的场景，便于驱逐者定时器自动摘除异常(宕机)的Redis服务器
-                // 但第二次请求又会重新连接上，模拟异常Redis服务器恢复正常的场景，便于驱逐者定时器自动添加恢复正常的Redis服务器
+                // 但只要请求一次命令又会重新连接上，模拟异常Redis服务器恢复正常的场景，便于驱逐者定时器自动添加恢复正常的Redis服务器
                 if (1 == i) {
                     JedisUtils.clientKill(jedis.getShard(key));
                 }

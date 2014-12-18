@@ -109,6 +109,9 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
         shardedJedis.disconnect();
     }
 
+    /** PING命令的正常返回值 */
+    private static final String PING_COMMAND_RETURN_VALUE = "PONG";
+
     /**
      * 校验整个{@link ShardedJedis}集群中所有的Jedis链接是否正常。
      * <p>
@@ -131,7 +134,7 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
             AtomicInteger brokenToActiveCounter = new AtomicInteger(0);
             for (Jedis shard : brokenShardMap.keySet()) {
                 try {
-                    if (shard.ping().equals("PONG")) {
+                    if (shard.ping().equals(PING_COMMAND_RETURN_VALUE)) {
                         // 探测到一个异常节点现在恢复正常了
                         JedisShardInfo activeShard = brokenShardMap.remove(shard);
                         if (null != activeShard) {
@@ -174,7 +177,7 @@ public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJed
             int size = activeShards.size();
             for (int i = 0; i < size; i++) {
                 jedis = activeShards.get(i);
-                if (!jedis.ping().equals("PONG")) {
+                if (!jedis.ping().equals(PING_COMMAND_RETURN_VALUE)) {
                     return false;
                 }
             }
