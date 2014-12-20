@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.pool2.PooledObjectFactory;
+import org.apache.commons.pool2.SwallowedExceptionListener;
 import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
@@ -121,8 +122,18 @@ public class CustomShardedJedisPool extends Pool<ShardedJedis> {
      * 
      * @param abandonedConfig
      */
-    public void setAbandonedConfig(AbandonedConfig abandonedConfig) {
-        this.internalPool.setAbandonedConfig(abandonedConfig);
+	public final void setAbandonedConfig(AbandonedConfig abandonedConfig) {
+		internalPool.setAbandonedConfig(abandonedConfig);
     }
+
+	/**
+	 * 设置用于接收"可被对象池吞掉的不可避免的异常"通知的监视器。
+	 * 
+	 * @param swallowedExceptionListener
+	 */
+	public final void setSwallowedExceptionListener(
+			SwallowedExceptionListener swallowedExceptionListener) {
+		internalPool.setSwallowedExceptionListener(swallowedExceptionListener);
+	}
 
 }
