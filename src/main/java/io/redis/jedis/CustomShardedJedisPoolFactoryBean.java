@@ -102,7 +102,7 @@ public class CustomShardedJedisPoolFactoryBean implements FactoryBean<CustomShar
 	 * @throws IOException
 	 */
 	private void setImmutablePoolConfig() throws IOException {
-
+		// 通过Redis的默认配置文件来设置以下这些不变属性
 		Properties defaultRedisConfigs = new Properties();
 		defaultRedisConfigs.load(this.getClass().getClassLoader()
 				.getResourceAsStream(DEFAULT_REDIS_CONFIG));
