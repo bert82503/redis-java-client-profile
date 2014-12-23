@@ -14,12 +14,16 @@ import java.util.Set;
 /**
  * 对"数据分片的Jedis连接池"的封装，增加开关功能。
  * <p>
- * 【使用示例】
+ * 【XML配置示例】
  * 
  * <pre>
- * <bean id="redisService" class="cn.fraudmetrix.forseti.biz.service.redis.impl.RedisServiceImpl" destroy-method="close">
- *     <property name="enabled" value="${redis.enabled}" />
+ * {@literal
+ * <bean id="redisService" class="io.redis.jedis.impl.RedisServiceImpl" destroy-method="close">
+ * }
+ *    &lt;property name="enabled" value="${redis.enabled}" />
+ * {@literal
  * </bean>
+ * }
  * </pre>
  * 
  * 【参考资料】
@@ -30,7 +34,7 @@ import java.util.Set;
  * 
  * @author huagang.li 2014年12月12日 上午10:26:14
  */
-public interface RedisService {
+public interface RedisService extends RedisShardedService {
 
     // =======================================================
     // Key (键) - http://redis.io/commands#generic
@@ -53,6 +57,20 @@ public interface RedisService {
     // * @return 当超时设置成功时，返回1； 当key不存在或者不能为key设置生存时间时，返回0 。
     // */
     // long expire(String key, int seconds);
+
+    /**
+     * 删除给定的一个或多个keys。<br>
+     * 不存在的key会被忽略。
+     * <p>
+     * Time complexity: O(N)，N为被删除的key的数量<br>
+     * 删除单个字符串类型的key，时间复杂度为O(1)。<br>
+     * 删除单个列表、集合、有序集合或哈希表类型的key，时间复杂度为O(M)，M为以上数据结构内的元素数量。<br>
+     * DEL key [key ...] - http://redis.io/commands/del
+     * 
+     * @param key 键
+     * @return 被删除key的数量；当没有key被删除时，返回0。
+     */
+    long del(String key);
 
     // =======================================================
     // String (字符串) - http://redis.io/commands#string
@@ -145,13 +163,15 @@ public interface RedisService {
      * 不同之处是：SETEX是一个原子操作，关联值和设置生存时间两个动作会在同一时间内完成。<br>
      * 该命令在Redis用作缓存时，非常实用。
      * <p>
+     * <font color="red"><b>注意：</b></font>生存时间必须大于0；若小于或等于0，请使用{@link #set(String, String)}方法！
+     * <p>
      * 时间复杂度: O(1)<br>
      * SETEX key seconds value - http://redis.io/commands/setex
      * 
      * @param key 键
      * @param seconds 生存时间(秒数)
      * @param value 字符串值
-     * @return 当设置操作成功时，返回OK；当seconds参数不合法时，返回一个错误。
+     * @return 当设置操作成功时，返回OK；当seconds参数不合法(<= 0)时，返回{@code null}。
      */
     String setex(String key, int seconds, String value);
 
@@ -261,7 +281,7 @@ public interface RedisService {
     String ltrim(String key, long start, long stop);
 
     // =======================================================
-    // SortedSet (有序集合) - http://redis.io/commands#sorted_set
+    // Sorted Set (有序集合) - http://redis.io/commands#sorted_set
     // 有序集，元素放入集合时还要提供该元素的分数，默认是从小到大排列。
     // ZRange/ZRevRange，按排名的上下限返回元素，正数与倒数。
     // ZRangeByScore/ZRevRangeByScore，按分数的上下限返回元素，正数与倒数。

@@ -5,10 +5,12 @@
  * use it only in accordance with the terms of the license agreement you entered
  * into with FraudMetrix.cn.
  */
-package io.redis.jedis;
+package io.redis.jedis.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
@@ -74,4 +76,18 @@ public class RedisConfigUtils {
         }
         return shards;
     }
+
+    /**
+     * 加载属性配置文件。
+     * 
+     * @param fileName 属性配置文件名
+     * @return
+     * @throws IOException
+     */
+    public static Properties loadPropertyFile(String fileName) throws IOException {
+        Properties configs = new Properties();
+        configs.load(RedisConfigUtils.class.getClassLoader().getResourceAsStream(fileName));
+        return configs;
+    }
+
 }

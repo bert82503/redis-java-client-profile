@@ -29,7 +29,7 @@ import redis.clients.jedis.ShardedJedisPool;
 import redis.clients.jedis.exceptions.JedisException;
 
 /**
- * 类ShardedJedisPoolTest.java的实现描述：{@link ShardedJedisPool} tutorial
+ * Test for {@link ShardedJedisPool}.
  * 
  * @author huagang.li 2014年11月13日 下午4:06:19
  */

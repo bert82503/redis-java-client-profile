@@ -5,7 +5,7 @@
  * use it only in accordance with the terms of the license agreement you entered
  * into with FraudMetrix.cn.
  */
-package io.redis.jedis;
+package io.redis.jedis.impl;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -23,7 +23,7 @@ import redis.clients.util.Pool;
 /**
  * "数据分片的Jedis连接池"自定义实现，继承自{@link Pool<ShardedJedis>}。
  * 
- * @author huagang.li 2014年12月4日 下午6:06:09
+ * @author huagang.li 2014年12月8日 下午6:06:09
  */
 public class CustomShardedJedisPool extends Pool<ShardedJedis> {
 
@@ -99,7 +99,7 @@ public class CustomShardedJedisPool extends Pool<ShardedJedis> {
             // FIXME ShardedJedis calls resetState twice when using with ShardedJedisPool (Fixes #811) (Jedis 2.6.2)
             // Pull Request at https://github.com/xetorthio/jedis/pull/822
             // 如果Jedis客户端升级到2.6.2版本及以上版本时，需要确认一下是否需要打开下面这行代码！
-//            resource.resetState();
+            // resource.resetState();
             this.returnResourceObject(resource);
         }
     }
@@ -122,18 +122,17 @@ public class CustomShardedJedisPool extends Pool<ShardedJedis> {
      * 
      * @param abandonedConfig
      */
-	public final void setAbandonedConfig(AbandonedConfig abandonedConfig) {
-		internalPool.setAbandonedConfig(abandonedConfig);
+    public final void setAbandonedConfig(AbandonedConfig abandonedConfig) {
+        this.internalPool.setAbandonedConfig(abandonedConfig);
     }
 
-	/**
-	 * 设置用于接收"可被对象池吞掉的不可避免的异常"通知的监视器。
-	 * 
-	 * @param swallowedExceptionListener
-	 */
-	public final void setSwallowedExceptionListener(
-			SwallowedExceptionListener swallowedExceptionListener) {
-		internalPool.setSwallowedExceptionListener(swallowedExceptionListener);
-	}
+    /**
+     * 设置用于接收"可被对象池吞掉的不可避免的异常"通知的监视器。
+     * 
+     * @param swallowedExceptionListener
+     */
+    public final void setSwallowedExceptionListener(SwallowedExceptionListener swallowedExceptionListener) {
+        internalPool.setSwallowedExceptionListener(swallowedExceptionListener);
+    }
 
 }

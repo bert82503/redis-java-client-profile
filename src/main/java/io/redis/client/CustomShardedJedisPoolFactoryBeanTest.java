@@ -20,8 +20,9 @@ import org.testng.annotations.Test;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.exceptions.JedisException;
-import io.redis.jedis.CustomShardedJedisPool;
-import io.redis.jedis.CustomShardedJedisPoolFactoryBean;
+import io.redis.jedis.impl.CustomShardedJedisPool;
+import io.redis.jedis.impl.CustomShardedJedisPoolFactoryBean;
+import io.redis.jedis.impl.CustomShardedJedisPoolFactoryBean.PoolBehaviour;
 
 /**
  * Test for {@link CustomShardedJedisPoolFactoryBean}.
@@ -34,14 +35,17 @@ public class CustomShardedJedisPoolFactoryBeanTest {
 
     private CustomShardedJedisPool pool;
 
-    @BeforeClass(enabled = false)
+    @BeforeClass
     public void init() throws Exception {
         CustomShardedJedisPoolFactoryBean shardedJedisPoolFactory = new CustomShardedJedisPoolFactoryBean();
-        shardedJedisPoolFactory.setRedisServers("192.168.6.189:6379:Shard-01,192.168.6.189:6380:Shard-02,192.168.6.189:6381:Shard-03");
+        shardedJedisPoolFactory.setRedisServers(TestConfigUtils.getRedisServers());
         shardedJedisPoolFactory.setTimeoutMillis(100);
         shardedJedisPoolFactory.setMaxTotalNum(32768);
         shardedJedisPoolFactory.setMaxIdleNum(32768);
         shardedJedisPoolFactory.setMinIdleNum(3);
+        shardedJedisPoolFactory.setPoolBehaviour(PoolBehaviour.LIFO);
+        shardedJedisPoolFactory.setTimeBetweenEvictionRunsSeconds(60);
+        shardedJedisPoolFactory.setNumTestsPerEvictionRun(10);
         shardedJedisPoolFactory.setMinEvictableIdleTimeMinutes(30L);
         shardedJedisPoolFactory.setMaxEvictableIdleTimeMinutes(TimeUnit.DAYS.toMinutes(1L));
         shardedJedisPoolFactory.setRemoveAbandonedTimeoutMinutes(5);
@@ -49,19 +53,19 @@ public class CustomShardedJedisPoolFactoryBeanTest {
         pool = shardedJedisPoolFactory.getObject();
     }
 
-    private static final String DEFAUL_VALUE = "1";
+    private static final String DEFAUL_VALUE = "bar";
 
     private static final String RET_OK       = "OK";
 
-    @Test(enabled = false, description = "验证SET操作")
+    @Test(description = "验证SET操作")
     public void set() {
         ShardedJedis jedis = null;
         JedisShardInfo shardInfo = null;
         String key = null;
 
-        int size = 5;
+        int size = 3;
         for (int i = 1; i <= size; i++) {
-            key = "st_" + i;
+            key = "foo_" + i;
 
             try {
                 // 获取一条Jedis连接
@@ -69,10 +73,14 @@ public class CustomShardedJedisPoolFactoryBeanTest {
 
                 // log Shard info
                 shardInfo = jedis.getShardInfo(key);
-                logger.info("Shard Info: " + shardInfo);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Key: {}, Shard Info: {}", key, shardInfo);
+                }
 
                 String statusCode = jedis.set(key, DEFAUL_VALUE);
                 assertEquals(statusCode, RET_OK);
+                String value = jedis.get(key);
+                assertEquals(value, DEFAUL_VALUE);
 
                 // 返回Jedis连接到连接池
                 jedis.close();
@@ -80,12 +88,10 @@ public class CustomShardedJedisPoolFactoryBeanTest {
                 String errorMsg = String.format("Failed to operate on '%s' Jedis Client", shardInfo);
                 logger.warn(errorMsg, je);
             }
-
-            logger.info("Complete time: {}", Integer.valueOf(i));
         }
     }
 
-    @AfterClass(enabled = false)
+    @AfterClass
     public void destroy() {
         pool.close();
     }

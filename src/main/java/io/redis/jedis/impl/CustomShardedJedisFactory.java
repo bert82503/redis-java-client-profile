@@ -5,7 +5,7 @@
  * use it only in accordance with the terms of the license agreement you entered
  * into with FraudMetrix.cn.
  */
-package io.redis.jedis;
+package io.redis.jedis.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import redis.clients.util.Hashing;
 /**
  * {@link PooledObjectFactory<ShardedJedis>}自定义实现类。
  * 
- * @author huagang.li 2014年12月4日 下午7:58:03
+ * @author huagang.li 2014年12月8日 下午6:58:03
  */
 public class CustomShardedJedisFactory implements PooledObjectFactory<ShardedJedis> {
 

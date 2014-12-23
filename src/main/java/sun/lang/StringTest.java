@@ -25,5 +25,21 @@ public class StringTest {
         };
         return testData;
     }
+    
+    @Test(dataProvider = "replaceAll")
+    public void replaceAll(String str, String expected) {
+         assertEquals(str.replaceAll("[^a-zA-Z0-9\\u4e00-\\u9fa5\\:\\.\\-\\_]", ""), expected);
+    }
+    @DataProvider(name = "replaceAll")
+    protected static final Object[][] replaceAllTestData() {
+        Object[][] testData = new Object[][] {
+                                              { "hello-李华刚", "hello-李华刚" },
+                                              { "w.or-l_d", "w.or-l_d" },
+                                              { "comment:12345:reply.to", "comment:12345:reply.to" },
+                                              { "hello, world!", "helloworld" },
+                                              { "你好，皮皮！", "你好皮皮" },
+        };
+        return testData;
+    }
 
 }
