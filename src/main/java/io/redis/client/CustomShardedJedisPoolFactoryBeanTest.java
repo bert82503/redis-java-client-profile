@@ -8,6 +8,9 @@
 package io.redis.client;
 
 import static org.testng.Assert.assertEquals;
+import io.redis.jedis.impl.CustomShardedJedisPool;
+import io.redis.jedis.impl.CustomShardedJedisPoolFactoryBean;
+import io.redis.jedis.impl.CustomShardedJedisPoolFactoryBean.PoolBehaviour;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,9 +23,6 @@ import org.testng.annotations.Test;
 import redis.clients.jedis.JedisShardInfo;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.exceptions.JedisException;
-import io.redis.jedis.impl.CustomShardedJedisPool;
-import io.redis.jedis.impl.CustomShardedJedisPoolFactoryBean;
-import io.redis.jedis.impl.CustomShardedJedisPoolFactoryBean.PoolBehaviour;
 
 /**
  * Test for {@link CustomShardedJedisPoolFactoryBean}.
