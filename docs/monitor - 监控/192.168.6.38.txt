@@ -1,0 +1,107 @@
+﻿
+# Server
+redis_version:2.8.19
+redis_git_sha1:00000000
+redis_git_dirty:0
+redis_build_id:974a39162812208c
+redis_mode:standalone
+os:Linux 2.6.32-431.el6.x86_64 x86_64
+arch_bits:64
+multiplexing_api:epoll
+gcc_version:4.4.7
+process_id:15579
+run_id:7d01ec8c5b952b277de33286b8d652bb6f792083
+tcp_port:6379
+uptime_in_seconds:1540253
+uptime_in_days:17
+hz:10
+lru_clock:11493146
+config_file:/usr/install/redis/conf/redis.conf
+
+# Clients
+connected_clients:36
+client_longest_output_list:0
+client_biggest_input_buf:0
+blocked_clients:0
+
+# Memory
+used_memory:39761576
+used_memory_human:37.92M
+used_memory_rss:47423488
+used_memory_peak:40093528
+used_memory_peak_human:38.24M
+used_memory_lua:35840
+mem_fragmentation_ratio:1.19
+mem_allocator:jemalloc-3.6.0
+
+# Persistence
+loading:0
+rdb_changes_since_last_save:106379
+rdb_bgsave_in_progress:0
+rdb_last_save_time:1419239037
+rdb_last_bgsave_status:ok
+rdb_last_bgsave_time_sec:-1
+rdb_current_bgsave_time_sec:-1
+aof_enabled:0
+aof_rewrite_in_progress:0
+aof_rewrite_scheduled:0
+aof_last_rewrite_time_sec:-1
+aof_current_rewrite_time_sec:-1
+aof_last_bgrewrite_status:ok
+aof_last_write_status:ok
+
+# Stats
+total_connections_received:1333
+total_commands_processed:336875
+instantaneous_ops_per_sec:0
+total_net_input_bytes:34012994
+total_net_output_bytes:101614500
+instantaneous_input_kbps:0.00
+instantaneous_output_kbps:0.00
+rejected_connections:0
+sync_full:0
+sync_partial_ok:0
+sync_partial_err:0
+expired_keys:48
+evicted_keys:0
+keyspace_hits:51720
+keyspace_misses:1421
+pubsub_channels:0
+pubsub_patterns:0
+latest_fork_usec:0
+
+# Replication
+role:master
+connected_slaves:0
+master_repl_offset:0
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+# CPU
+used_cpu_sys:1345.75
+used_cpu_user:553.95
+used_cpu_sys_children:0.00
+used_cpu_user_children:0.00
+
+# Commandstats
+cmdstat_get:calls=1235,usec=6011,usec_per_call=4.87
+cmdstat_set:calls=98,usec=921,usec_per_call=9.40
+cmdstat_setex:calls=318,usec=4535,usec_per_call=14.26
+cmdstat_del:calls=13,usec=79,usec_per_call=6.08
+cmdstat_lpush:calls=42591,usec=282363,usec_per_call=6.63
+cmdstat_rpop:calls=8,usec=55,usec_per_call=6.88
+cmdstat_lrange:calls=16246,usec=155473,usec_per_call=9.57
+cmdstat_ltrim:calls=8,usec=8337,usec_per_call=1042.12
+cmdstat_zadd:calls=48054,usec=662280,usec_per_call=13.78
+cmdstat_zremrangebyscore:calls=6,usec=7206,usec_per_call=1201.00
+cmdstat_zremrangebyrank:calls=3,usec=110,usec_per_call=36.67
+cmdstat_zrange:calls=5,usec=6077,usec_per_call=1215.40
+cmdstat_zrevrangebyscore:calls=32328,usec=766318,usec_per_call=23.70
+cmdstat_zcard:calls=3327,usec=15617,usec_per_call=4.69
+cmdstat_ping:calls=192628,usec=626988,usec_per_call=3.25
+cmdstat_monitor:calls=7,usec=42,usec_per_call=6.00
+
+# Keyspace
+db0:keys=32774,expires=0,avg_ttl=0
