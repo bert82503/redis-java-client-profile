@@ -9,3 +9,4 @@ sudo sh /usr/apps/redis/utils/redis_init_script.sh stop 6386
 # 启动Redis服务器
 sudo sh /usr/apps/redis/utils/redis_init_script.sh start 6386
 
+
