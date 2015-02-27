@@ -20,7 +20,7 @@
               `-.__.-'                                               
 
 [29734] 12 Nov 20:42:50.991 # Server started, Redis version 2.8.17
-[29734] 12 Nov 20:42:50.991 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+[29734] 12 Nov 20:42:50.991 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.  # 警告：overcommit_memory被设置为0，后台保存在低内存条件下可能会失败！若要修复此问题，有两种方法：一、增加'vm.overcommit_memory = 1'到"/etc/sysctl.conf"文件中，然后重启机器；二、运行'sysctl vm.overcommit_memory=1'命令
 [29734] 12 Nov 20:42:50.991 * The server is now ready to accept connections on port 6379
 [29734] 12 Nov 20:51:34.207 # User requested shutdown...
 [29734] 12 Nov 20:51:34.208 * Saving the final RDB snapshot before exiting.
@@ -28,7 +28,7 @@
 [29734] 12 Nov 20:51:34.247 * Removing the pid file.
 [29734] 12 Nov 20:51:34.247 # Redis is now ready to exit, bye bye...
 
-[1005] 13 Nov 09:01:22.980 * Increased maximum number of open files to 65568 (it was originally set to 1024).
+[1005] 13 Nov 09:01:22.980 * Increased maximum number of open files to 65568 (it was originally set to 1024).   # 增加打开文件的最大数量。ulimit -n：查看操作系统能同时打开的文件描述符的最大数量
                 _._                                                  
            _.-``__ ''-._                                             
       _.-``    `.  `_.  ''-._           Redis 2.8.17 (00000000/0) 64 bit
@@ -55,5 +55,14 @@
 [1005] 13 Nov 09:21:18.779 * DB saved on disk
 [1005] 13 Nov 09:21:18.779 * Removing the pid file.
 [1005] 13 Nov 09:21:18.779 # Redis is now ready to exit, bye bye...
+
+
+内核参数说明如下：
+'vm.overcommit_memory'参数指定了内核针对内存分配的策略，其值可以是0、1、2。
+0， 表示内核将检查是否有足够的可用内存供应用进程使用。如果有足够的可用内存，内存申请允许；否则，内存申请失败，并把错误返回给应用进程。
+1， 表示内核允许分配所有的物理内存，而不管当前的内存状态如何。
+2， 表示内核允许分配超过所有物理内存和交换空间总和的内存。
+
+ulimit -n：查看操作系统能同时打开的文件描述符的最大数量
 
 
