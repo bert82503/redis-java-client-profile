@@ -1,0 +1,59 @@
+
+
+[29734] 12 Nov 20:42:50.984 * Increased maximum number of open files to 65568 (it was originally set to 65536).
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 2.8.17 (00000000/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in stand alone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 29734
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+[29734] 12 Nov 20:42:50.991 # Server started, Redis version 2.8.17
+[29734] 12 Nov 20:42:50.991 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+[29734] 12 Nov 20:42:50.991 * The server is now ready to accept connections on port 6379
+[29734] 12 Nov 20:51:34.207 # User requested shutdown...
+[29734] 12 Nov 20:51:34.208 * Saving the final RDB snapshot before exiting.
+[29734] 12 Nov 20:51:34.247 * DB saved on disk
+[29734] 12 Nov 20:51:34.247 * Removing the pid file.
+[29734] 12 Nov 20:51:34.247 # Redis is now ready to exit, bye bye...
+
+[1005] 13 Nov 09:01:22.980 * Increased maximum number of open files to 65568 (it was originally set to 1024).
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 2.8.17 (00000000/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in stand alone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 1005
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+[1005] 13 Nov 09:01:23.066 # Server started, Redis version 2.8.17
+[1005] 13 Nov 09:01:23.213 * DB loaded from disk: 0.148 seconds
+[1005] 13 Nov 09:01:23.213 * The server is now ready to accept connections on port 6379
+[1005] 13 Nov 09:21:18.730 # User requested shutdown...
+[1005] 13 Nov 09:21:18.730 * Saving the final RDB snapshot before exiting.
+[1005] 13 Nov 09:21:18.779 * DB saved on disk
+[1005] 13 Nov 09:21:18.779 * Removing the pid file.
+[1005] 13 Nov 09:21:18.779 # Redis is now ready to exit, bye bye...
+
+
