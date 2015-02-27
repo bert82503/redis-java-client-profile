@@ -14,6 +14,22 @@ import org.testng.annotations.Test;
  */
 public class StringTest {
 
+    @Test(dataProvider = "format")
+    public void format(String format, Object arg, String expected) {
+         assertEquals(String.format(format, arg), expected);
+    }
+    @DataProvider(name = "format")
+    protected static final Object[][] formatTestData() {
+        Object[][] testData = new Object[][] {
+                                              { "%s", "string", "string" },
+                                              { "%d", 3, "3" }, // int
+                                              { "%1.1f", 2.3, "2.3" }, // double
+                                              { "%f", 3D, "3.000000" }, // double
+                                              { "%.0f", 3D, "3" }, // double
+        };
+        return testData;
+    }
+    
     @Test(dataProvider = "split")
     public void split(String str, String regex, String expected) {
          assertEquals(Arrays.toString(str.split(regex)), expected);

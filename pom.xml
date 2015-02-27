@@ -1,94 +1,92 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.redis</groupId>
-  <artifactId>redis-java-client-profile</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+	<groupId>io.redis</groupId>
+	<artifactId>redis-java-client-profile</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
-  <name>redis-java-client-profile</name>
-  <url>https://github.com/antirez/redis</url>
+	<name>redis-java-client-profile</name>
+	<url>https://github.com/antirez/redis</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>1.4.1.RELEASE</spring.version>
-    <btrace.version>1.2.3</btrace.version>
-    <jedis.version>2.6.1</jedis.version>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring.version>1.4.1.RELEASE</spring.version>
+		<btrace.version>1.2.3</btrace.version>
+		<jedis.version>2.6.1</jedis.version>
+	</properties>
 
-  <dependencies>
-	<!-- ======================================= -->
-	<!-- Apache Commons 框架 -->
-	<!-- ======================================= -->
-	<dependency>
-		<groupId>org.apache.commons</groupId>
-		<artifactId>commons-lang3</artifactId>
-		<version>3.3.2</version>
-	</dependency>
-	<dependency>
-		<groupId>commons-io</groupId>
-		<artifactId>commons-io</artifactId>
-		<version>2.4</version>
-	</dependency>
-	
-	<!-- ======================================= -->
-	<!-- BTrace - 动态追踪工具 -->
-	<!-- ======================================= -->
-	<dependency>
-  		<groupId>com.sun.tools.btrace</groupId>
-  		<artifactId>btrace-boot</artifactId>
-  		<version>${btrace.version}</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.sun.tools.btrace</groupId>
-  		<artifactId>btrace-agent</artifactId>
-  		<version>${btrace.version}</version>
-  	</dependency>
+	<dependencies>
+		<!-- ======================================= -->
+		<!-- Apache Commons 框架 -->
+		<!-- ======================================= -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
 
-	<!-- ======================================= -->
-	<!-- 缓存（Redis）客户端 -->
-	<!-- ======================================= -->
-	<dependency>
-		<groupId>redis.clients</groupId>
-		<artifactId>jedis</artifactId>
-		<version>${jedis.version}</version>
-	</dependency>
-	<dependency>
-		<groupId>org.springframework.data</groupId>
-		<artifactId>spring-data-redis</artifactId>
-		<version>${spring.version}</version>
-	</dependency>
-	<!-- 
-	<dependency>
-		<groupId>org.redisson</groupId>
-		<artifactId>redisson</artifactId>
-		<version>1.1.5</version>
-	</dependency>
-	 -->
+		<!-- ======================================= -->
+		<!-- BTrace - 动态追踪工具 -->
+		<!-- ======================================= -->
+		<dependency>
+			<groupId>com.sun.tools.btrace</groupId>
+			<artifactId>btrace-boot</artifactId>
+			<version>${btrace.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.tools.btrace</groupId>
+			<artifactId>btrace-agent</artifactId>
+			<version>${btrace.version}</version>
+		</dependency>
 
-	<!-- ======================================= -->
-	<!-- 日志（Log）框架 -->
-	<!-- ======================================= -->
-	<dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-api</artifactId>
-		<version>1.7.7</version>
-	</dependency>
-	<dependency>
-		<groupId>ch.qos.logback</groupId>
-		<artifactId>logback-classic</artifactId>
-		<version>1.1.2</version>
-	</dependency>
+		<!-- ======================================= -->
+		<!-- 缓存（Redis）客户端 -->
+		<!-- ======================================= -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>${jedis.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson</artifactId>
+			<version>1.1.5</version>
+		</dependency> -->
 
-	<!-- ======================================= -->
-	<!-- 测试（Test）框架 -->
-	<!-- ======================================= -->
-	<dependency>
-		<groupId>org.testng</groupId>
-		<artifactId>testng</artifactId>
-		<version>6.8.8</version>
-		<scope>test</scope>
-	</dependency>
-  </dependencies>
+		<!-- ======================================= -->
+		<!-- 日志（Log）框架 -->
+		<!-- ======================================= -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+		<!-- ======================================= -->
+		<!-- 测试（Test）框架 -->
+		<!-- ======================================= -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.8.8</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
