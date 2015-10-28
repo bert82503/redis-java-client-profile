@@ -83,7 +83,7 @@ Running Redis (运行Redis服务器)
 -------------
 
 To run Redis with the default configuration just type:
-使用默认配置来运行Redis实例：
+使用`默认配置`来运行Redis实例：
 
     % cd src
     % ./redis-server
@@ -166,7 +166,7 @@ You'll be able to stop and start Redis using the script named
 /etc/init.d/redis_<portnumber>, for instance /etc/init.d/redis_6379.
 
 您可以使用`/etc/init.d/redis_<portnumber>`命名的脚本来停止和启动Redis，
-例如 /etc/init.d/redis_6379。
+例如`/etc/init.d/redis_6379`。
 
 Code contributions (代码贡献)
 ---
